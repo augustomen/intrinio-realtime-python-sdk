@@ -62,8 +62,8 @@ class IntrinioRealtimeClient:
             self.on_quote = None
         
         if self.provider not in PROVIDERS:
-            raise ValueError(f"Parameter 'provider' is invalid, use one of {PROVIDERS}")
-        
+            raise ValueError("Parameter 'provider' is invalid, use one of {}".format(PROVIDERS))
+
         self.ready = False
         self.token = None
         self.ws = None
@@ -101,7 +101,7 @@ class IntrinioRealtimeClient:
             self.refresh_token()
             self.refresh_websocket()
         except Exception as e:
-            self.logger.error(f"Cannot connect: {e}")
+            self.logger.error("Cannot connect: {}".format(e))
             return self.self_heal()
             
     def disconnect(self):
@@ -166,23 +166,23 @@ class IntrinioRealtimeClient:
 
         # Join new channels
         new_channels = self.channels - self.joined_channels
-        self.logger.debug(f"New channels: {new_channels}")
+        self.logger.debug("New channels: {}".format(new_channels))
         for channel in new_channels:
             msg = self.join_message(channel)
             self.ws.send(json.dumps(msg))
-            self.logger.info(f"Joined channel {channel}")
-        
+            self.logger.info("Joined channel {}".format(channel))
+
         # Leave old channels
         old_channels = self.joined_channels - self.channels
-        self.logger.debug(f"Old channels: {old_channels}")
+        self.logger.debug("Old channels: {}".format(old_channels))
         for channel in old_channels:
             msg = self.leave_message(channel)
             self.ws.send(json.dumps(msg))
-            self.logger.info(f"Left channel {channel}")
-        
+            self.logger.info("Left channel {}".format(channel))
+
         self.joined_channels = self.channels.copy()
-        self.logger.debug(f"Current channels: {self.joined_channels}")
-        
+        self.logger.debug("Current channels: {}".format(self.joined_channels))
+
     def join_message(self, channel):
         if self.provider == IEX:
             return {
@@ -223,8 +223,8 @@ class IntrinioRealtimeClient:
         elif channel == "$lobby_last_price":
             return "iex:lobby:last_price"
         else:
-            return f"iex:securities:{channel}"
-        
+            return "iex:securities:{}".format(channel)
+
 class QuoteReceiver(threading.Thread):
     def __init__(self, client):
         threading.Thread.__init__(self, args=(), kwargs=None)
@@ -254,12 +254,12 @@ class QuoteReceiver(threading.Thread):
         self.client.logger.info("Websocket closed!")
 
     def on_error(self, ws, error):
-        self.client.logger.error(f"Websocket ERROR: {error}")
+        self.client.logger.error("Websocket ERROR: {}".format(error))
         self.client.self_heal()
         
     def on_message(self, ws, message):
         message = json.loads(message)
-        self.client.logger.debug(f"Received message: {message}")
+        self.client.logger.debug("Received message: {}".format(message))
         quote = None
         
         if self.client.provider == IEX:
